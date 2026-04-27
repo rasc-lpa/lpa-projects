@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LPA Project — Standardized Language Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F2340;
+    --teal: #1D9E75;
+    --teal-light: #E1F5EE;
+    --teal-mid: #9FE1CB;
+    --gold: #BA7517;
+    --gold-light: #FAEEDA;
+    --gray-text: #4B5563;
+    --gray-muted: #9CA3AF;
+    --gray-border: #E5E7EB;
+    --gray-bg: #F9FAFB;
+    --white: #ffffff;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--gray-bg);
+    color: var(--navy);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--navy);
+    padding: 3.5rem 2rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(29,158,117,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .stars {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+  }
+
+  @keyframes twinkle {
+    from { opacity: 0.2; }
+    to { opacity: 0.9; }
+  }
+
+  .header-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--teal-mid);
+    border: 1px solid rgba(29,158,117,0.4);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 1.2rem;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: white;
+    line-height: 1.2;
+    max-width: 600px;
+    margin-bottom: 1.2rem;
+  }
+
+  .desc {
+    font-size: 15px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.7;
+    max-width: 580px;
+    font-weight: 300;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .meta-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+  }
+
+  .meta-chip svg { opacity: 0.7; }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  .progress-card {
+    background: white;
+    border: 1px solid var(--gray-border);
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .prog-stat { flex: 1; min-width: 140px; }
+  .prog-stat .num { font-family: 'DM Serif Display', serif; font-size: 2.5rem; color: var(--navy); line-height: 1; }
+  .prog-stat .lbl { font-size: 12px; color: var(--gray-muted); margin-top: 4px; letter-spacing: 0.03em; }
+
+  .prog-bar-wrap { flex: 3; min-width: 200px; }
+  .prog-bar-label { font-size: 13px; color: var(--gray-text); margin-bottom: 8px; }
+  .prog-track { height: 8px; background: var(--gray-border); border-radius: 4px; overflow: hidden; }
+  .prog-fill { height: 8px; background: linear-gradient(90deg, var(--teal), #5DCAA5); border-radius: 4px; transition: width 0.5s ease; }
+
+  .section-head {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 1rem;
+  }
+
+  .tasks { display: flex; flex-direction: column; gap: 0; }
+
+  .task {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 13px 16px;
+    border: 1px solid var(--gray-border);
+    border-bottom: none;
+    background: white;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+
+  .task:first-child { border-radius: 12px 12px 0 0; }
+  .task:last-child { border-bottom: 1px solid var(--gray-border); border-radius: 0 0 12px 12px; }
+  .task:hover { background: #fafeff; }
+  .task.done { background: #f9fafb; }
+
+  .cb {
+    width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px;
+    border: 1.5px solid var(--gray-border);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .task.done .cb { background: var(--teal); border-color: var(--teal); }
+
+  .cb svg { display: none; }
+  .task.done .cb svg { display: block; }
+
+  .task-num {
+    font-size: 11px;
+    color: var(--gray-muted);
+    min-width: 18px;
+    padding-top: 2px;
+    font-weight: 500;
+  }
+
+  .task-text {
+    font-size: 14px;
+    color: var(--navy);
+    line-height: 1.55;
+  }
+
+  .task.done .task-text {
+    text-decoration: line-through;
+    color: var(--gray-muted);
+  }
+
+  .share-section {
+    margin-top: 2.5rem;
+    background: white;
+    border: 1px solid var(--gray-border);
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+  }
+
+  .share-section h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+
+  .share-section p {
+    font-size: 13px;
+    color: var(--gray-muted);
+    margin-bottom: 1rem;
+  }
+
+  .share-row { display: flex; gap: 8px; }
+
+  .share-input {
+    flex: 1;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 9px 13px;
+    border: 1px solid var(--gray-border);
+    border-radius: 8px;
+    outline: none;
+    color: var(--navy);
+    background: var(--gray-bg);
+    transition: border 0.15s;
+  }
+
+  .share-input:focus { border-color: var(--teal); background: white; }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-border);
+    background: white;
+    color: var(--navy);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { background: var(--teal-light); border-color: var(--teal-mid); color: var(--teal); }
+  .btn.primary { background: var(--navy); color: white; border-color: var(--navy); }
+  .btn.primary:hover { background: #1a3a5c; }
+
+  .people-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+
+  .person-tag {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; padding: 5px 11px;
+    border: 1px solid var(--teal-mid);
+    background: var(--teal-light);
+    color: var(--teal);
+    border-radius: 20px;
+  }
+
+  .person-tag button {
+    background: none; border: none; cursor: pointer;
+    color: var(--teal); font-size: 15px; line-height: 1; padding: 0;
+    opacity: 0.6;
+  }
+
+  .person-tag button:hover { opacity: 1; }
+
+  .actions { display: flex; gap: 10px; margin-top: 1.25rem; flex-wrap: wrap; }
+
+  .status-msg {
+    font-size: 12px;
+    color: var(--teal);
+    margin-top: 8px;
+    min-height: 18px;
+    font-weight: 500;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--gray-muted);
+    padding: 1.5rem 2rem 2.5rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="stars" id="stars"></div>
+  <div class="header-inner">
+    <div class="badge">LPA Initiative · RASC</div>
+    <h1>Standardized Language for LPA Use</h1>
+    <p class="desc">Develop comprehensive messaging guidelines for Light Pollution Abatement initiatives — emphasizing natural night environments, starry sky preservation, and human and environmental health.</p>
+    <div class="meta-row">
+      <div class="meta-chip">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3.5l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        12 tasks
+      </div>
+      <div class="meta-chip">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3.5" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 2v3M11 2v3M2 7.5h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        April 2026
+      </div>
+      <div class="meta-chip">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+        RASC Canada
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="progress-card">
+    <div class="prog-stat">
+      <div class="num" id="done-count">0</div>
+      <div class="lbl">tasks complete</div>
+    </div>
+    <div class="prog-stat">
+      <div class="num">12</div>
+      <div class="lbl">total tasks</div>
+    </div>
+    <div class="prog-bar-wrap">
+      <div class="prog-bar-label" id="prog-label">0% complete — get started below</div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="section-head">Project Tasks</div>
+  <div class="tasks" id="task-list"></div>
+
+  <div class="share-section">
+    <h3>Share this project</h3>
+    <p>Add team members or stakeholders to notify about this project.</p>
+    <div class="share-row">
+      <input class="share-input" id="email-input" type="text" placeholder="Name or email address" />
+      <button class="btn" onclick="addPerson()">Add</button>
+    </div>
+    <div class="people-list" id="people-list"></div>
+    <div class="actions">
+      <button class="btn primary" onclick="copyProject()">Copy project summary</button>
+      <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+    <div class="status-msg" id="status-msg"></div>
+  </div>
+
+</main>
+
+<footer>Royal Astronomical Society of Canada · Light Pollution Abatement Initiative · 2026</footer>
+
+<script>
+const tasks = [
+  "Research existing LPA terminology frameworks and best practices from peer organizations",
+  "Conduct stakeholder consultation to gather input from RASC centers, partners, and target audiences on preferred language",
+  "Draft core terminology guidelines defining 'natural night', 'starry skies', 'respectful lighting', and other key terms",
+  "Develop messaging templates for human health benefits of reduced light pollution",
+  "Create messaging templates for environmental and ecological benefits of dark sky preservation",
+  "Establish style guide with tone, voice, and formatting standards for consistent communication",
+  "Create audience-specific messaging variations for different stakeholder groups (municipalities, public, partners)",
+  "Design multilingual translation framework to ensure consistent messaging in French and English",
+  "Develop implementation toolkit with examples, templates, and usage guidelines for local centers",
+  "Test standardized language framework with pilot centers and gather feedback for refinement",
+  "Finalize comprehensive LPA language and messaging guidelines document",
+  "Distribute approved guidelines to all RASC centers and LPA stakeholders with training materials"
+];
+
+let checked = new Array(tasks.length).fill(false);
+let people = [];
+
+function renderTasks() {
+  const list = document.getElementById('task-list');
+  list.innerHTML = '';
+  tasks.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = 'task' + (checked[i] ? ' done' : '');
+    div.onclick = () => { checked[i] = !checked[i]; renderTasks(); updateProgress(); };
+    div.innerHTML = `
+      <div class="cb">
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+          <polyline points="1,4 3.5,6.5 9,1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="task-num">${i+1}</span>
+      <span class="task-text">${t}</span>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function updateProgress() {
+  const done = checked.filter(Boolean).length;
+  const pct = Math.round((done / tasks.length) * 100);
+  document.getElementById('done-count').textContent = done;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = done === 0
+    ? "0% complete — get started below"
+    : done === tasks.length
+    ? "All tasks complete!"
+    : `${pct}% complete · ${tasks.length - done} remaining`;
+}
+
+function addPerson() {
+  const inp = document.getElementById('email-input');
+  const val = inp.value.trim();
+  if (!val || people.includes(val)) { inp.value = ''; return; }
+  people.push(val);
+  renderPeople();
+  inp.value = '';
+}
+
+document.getElementById('email-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addPerson();
+});
+
+function removePerson(name) {
+  people = people.filter(p => p !== name);
+  renderPeople();
+}
+
+function renderPeople() {
+  const list = document.getElementById('people-list');
+  list.innerHTML = '';
+  people.forEach(p => {
+    const tag = document.createElement('div');
+    tag.className = 'person-tag';
+    const safe = p.replace(/'/g, "\\'");
+    tag.innerHTML = `<span>${p}</span><button onclick="removePerson('${safe}')">×</button>`;
+    list.appendChild(tag);
+  });
+}
+
+function copyProject() {
+  const done = checked.filter(Boolean).length;
+  const taskLines = tasks.map((t, i) => `${checked[i] ? '[x]' : '[ ]'} ${i+1}. ${t}`).join('\n');
+  const shareWith = people.length ? '\n\nShared with: ' + people.join(', ') : '';
+  const text = `PROJECT: Create a Standardized Language for LPA Use\n\nDescription:\nDevelop comprehensive standardized language and messaging guidelines for LPA (Light Pollution Abatement) initiatives, emphasizing natural night environments, starry sky preservation, and human and environmental health.\n\nProgress: ${done}/${tasks.length} tasks complete\n\nTASKS:\n${taskLines}${shareWith}\n\nRoyal Astronomical Society of Canada · LPA Initiative · April 2026`;
+  navigator.clipboard.writeText(text).then(() => {
+    const msg = document.getElementById('status-msg');
+    msg.textContent = 'Project summary copied to clipboard!';
+    setTimeout(() => { msg.textContent = ''; }, 3000);
+  });
+}
+
+// Generate stars
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 60; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2 + 1;
+  s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;opacity:${Math.random()*0.5+0.1};animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*3}s`;
+  starsEl.appendChild(s);
+}
+
+renderTasks();
+updateProgress();
+</script>
+</body>
+</html>
