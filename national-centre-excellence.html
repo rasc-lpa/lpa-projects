@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RASC LPA — National Centre of Excellence for Light Pollution</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #0B1724; --deep: #081018; --teal: #1D9E75; --teal-glow: #2ECFA0;
+  --amber: #D4A24C; --silver: #C8D6E8; --mist: rgba(200,214,232,0.55);
+  --fog: rgba(200,214,232,0.22); --white: #F0F4FA;
+  --priority: #D4A24C;
+}
+body { font-family: 'Jost', sans-serif; background: var(--deep); color: var(--white); min-height: 100vh; overflow-x: hidden; }
+#sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+body::after { content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 200px 200px; opacity: 0.4; }
+.page { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+.back { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal-glow); text-decoration: none; margin-bottom: 2.5rem; opacity: 0.8; transition: opacity 0.2s; }
+.back:hover { opacity: 1; }
+.badge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap; }
+.tag { font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; display: inline-block; }
+.tag-active { background: rgba(29,158,117,0.15); color: var(--teal-glow); border: 1px solid rgba(29,158,117,0.3); }
+.tag-planning { background: rgba(212,162,76,0.12); color: var(--amber); border: 1px solid rgba(212,162,76,0.25); }
+.tag-done { background: rgba(200,214,232,0.08); color: var(--mist); border: 1px solid rgba(200,214,232,0.18); }
+.tag-priority { background: rgba(212,162,76,0.15); color: var(--amber); border: 1px solid rgba(212,162,76,0.4); }
+h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.15; color: var(--white); margin-bottom: 1rem; }
+.desc { font-size: 14px; font-weight: 300; color: var(--mist); line-height: 1.75; margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(200,214,232,0.1); }
+.progress-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(200,214,232,0.1); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; }
+.prog-stat .num { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--white); line-height: 1; }
+.prog-stat .lbl { font-size: 11px; color: var(--fog); margin-top: 3px; }
+.prog-bar-wrap { flex: 3; min-width: 180px; }
+.prog-bar-label { font-size: 12px; color: var(--mist); margin-bottom: 7px; }
+.prog-track { height: 6px; background: rgba(200,214,232,0.1); border-radius: 3px; }
+.prog-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--teal), var(--teal-glow)); transition: width 0.5s ease; }
+.section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--teal-glow); margin-bottom: 1rem; }
+.tasks { display: flex; flex-direction: column; }
+.task { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid rgba(200,214,232,0.08); border-bottom: none; background: rgba(255,255,255,0.02); cursor: pointer; transition: background 0.15s; user-select: none; }
+.task:first-child { border-radius: 12px 12px 0 0; }
+.task:last-child { border-bottom: 1px solid rgba(200,214,232,0.08); border-radius: 0 0 12px 12px; }
+.task:hover { background: rgba(255,255,255,0.045); }
+.task.done { background: rgba(0,0,0,0.1); }
+.cb { width: 17px; height: 17px; flex-shrink: 0; margin-top: 1px; border: 1.5px solid rgba(200,214,232,0.2); border-radius: 5px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.task.done .cb { background: var(--teal); border-color: var(--teal); }
+.cb svg { display: none; }
+.task.done .cb svg { display: block; }
+.task-num { font-size: 11px; color: var(--fog); min-width: 16px; padding-top: 2px; }
+.task-text { font-size: 13px; color: var(--white); line-height: 1.55; font-weight: 300; }
+.task.done .task-text { text-decoration: line-through; color: var(--fog); }
+footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid rgba(200,214,232,0.08); font-size: 11px; color: var(--fog); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+footer a { color: var(--teal-glow); text-decoration: none; font-size: 11px; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+.page > * { animation: fadeUp 0.6s both; }
+.page > *:nth-child(2) { animation-delay: 0.05s; }
+.page > *:nth-child(3) { animation-delay: 0.1s; }
+.page > *:nth-child(4) { animation-delay: 0.15s; }
+.page > *:nth-child(5) { animation-delay: 0.2s; }
+.page > *:nth-child(6) { animation-delay: 0.25s; }
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<div class="page">
+  <a class="back" href="index.html">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3L5 8l5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All Projects
+  </a>
+  <div class="badge-row">
+    <span class="tag tag-planning">Planning</span>
+    <span class="tag tag-priority">★ Priority</span>
+  </div>
+  <h1>National Centre of Excellence for Light Pollution</h1>
+  <p class="desc">Establish a comprehensive national center that serves as the primary hub for light pollution research, education, and resource development. This center will coordinate efforts across organizations, develop best practices, provide educational materials, and serve as a central repository for light pollution data and mitigation strategies.</p>
+
+  <div class="progress-card">
+    <div class="prog-stat"><div class="num" id="done-count">0</div><div class="lbl">complete</div></div>
+    <div class="prog-stat"><div class="num">11</div><div class="lbl">total tasks</div></div>
+    <div class="prog-bar-wrap">
+      <div class="prog-bar-label" id="prog-label">0% — get started</div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Tasks</div>
+  <div class="tasks" id="task-list"></div>
+
+  <footer>
+    <span>RASC · Light Pollution Abatement · Project 22</span>
+    <a href="index.html">← Back to all projects</a>
+  </footer>
+</div>
+<script>
+const tasks = ["Define the mandate, scope, and structure of the national centre of excellence", "Research models from other national centres of excellence for reference", "Identify key partners and collaborators across research, government, and NGO sectors", "Develop a governance and advisory structure proposal", "Define core services: research coordination, resource repository, education, advocacy", "Identify funding models and potential revenue or grant sources", "Build a roadmap and phased implementation plan", "Present proposal to RASC board for endorsement and funding discussion", "Establish the digital infrastructure (website, repository, database)", "Launch centre with inaugural resources and announce to stakeholders", "Develop ongoing programming: webinars, publications, working groups"];
+let checked = new Array(tasks.length).fill(false);
+function render() {
+  const list = document.getElementById('task-list');
+  list.innerHTML = '';
+  tasks.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = 'task' + (checked[i] ? ' done' : '');
+    div.onclick = () => { checked[i] = !checked[i]; render(); update(); };
+    div.innerHTML = `<div class="cb"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 3.5,6.5 9,1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="task-num">${i+1}</span><span class="task-text">${t}</span>`;
+    list.appendChild(div);
+  });
+}
+function update() {
+  const done = checked.filter(Boolean).length;
+  const pct = Math.round((done/tasks.length)*100);
+  document.getElementById('done-count').textContent = done;
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = done===tasks.length ? 'All tasks complete!' : pct+'% complete · '+(tasks.length-done)+' remaining';
+}
+// Stars
+const canvas = document.getElementById('sky');
+const ctx = canvas.getContext('2d');
+let stars=[], W, H;
+function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+function initStars(){ stars=[]; const n=Math.floor(W*H/8000); for(let i=0;i<n;i++) stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.1+0.2,a:Math.random(),sp:Math.random()*0.007+0.002,ph:Math.random()*Math.PI*2}); }
+function draw(t){ ctx.clearRect(0,0,W,H); const bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#060d16'); bg.addColorStop(1,'#0B1724'); ctx.fillStyle=bg; ctx.fillRect(0,0,W,H); stars.forEach(s=>{ const al=0.25+0.75*(0.5+0.5*Math.sin(t*s.sp+s.ph)); ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(220,232,250,${al*s.a})`; ctx.fill(); }); }
+window.addEventListener('resize',()=>{resize();initStars();});
+resize(); initStars();
+(function loop(t){ draw(t*0.001); requestAnimationFrame(loop); })(0);
+render(); update();
+</script>
+</body>
+</html>
