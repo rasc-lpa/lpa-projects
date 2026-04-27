@@ -7,553 +7,308 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --ink:      #0B1724;
-  --deep:     #081018;
-  --teal:     #1D9E75;
-  --teal-glow:#2ECFA0;
-  --amber:    #D4A24C;
-  --amber-dim:#8A6830;
-  --silver:   #C8D6E8;
-  --mist:     rgba(200,214,232,0.55);
-  --fog:      rgba(200,214,232,0.22);
-  --white:    #F0F4FA;
+  --ink: #0B1724; --deep: #081018; --teal: #1D9E75; --teal-glow: #2ECFA0;
+  --amber: #D4A24C; --amber-dim: #8A6830; --silver: #C8D6E8;
+  --mist: rgba(200,214,232,0.55); --fog: rgba(200,214,232,0.22); --white: #F0F4FA;
 }
-
 html { scroll-behavior: smooth; }
-
-body {
-  font-family: 'Jost', sans-serif;
-  background: var(--deep);
-  color: var(--white);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* ── CANVAS ── */
-#sky {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* ── GRAIN OVERLAY ── */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
+body { font-family: 'Jost', sans-serif; background: var(--deep); color: var(--white); min-height: 100vh; overflow-x: hidden; }
+#sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+body::after { content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
-  opacity: 0.4;
-}
-
-/* ── LAYOUT ── */
+  background-size: 200px 200px; opacity: 0.4; }
 .page { position: relative; z-index: 2; }
 
-/* ── HEADER ── */
-header {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 5rem 2rem 4rem;
-  position: relative;
-}
+/* HEADER */
+header { min-height: 88vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 5rem 2rem 4rem; position: relative; }
+.glow-orb { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(29,158,117,0.12) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-60%); pointer-events: none; }
+.org-label { font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--teal-glow); margin-bottom: 2rem; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+.hero-title { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(2.8rem, 7vw, 5.5rem); line-height: 1.08; color: var(--white); max-width: 800px; margin-bottom: 1.8rem; opacity: 0; animation: fadeUp 0.9s 0.4s forwards; }
+.hero-title em { font-style: italic; color: var(--amber); }
+.hero-sub { font-size: 15px; font-weight: 300; color: var(--mist); max-width: 500px; line-height: 1.75; margin-bottom: 3rem; opacity: 0; animation: fadeUp 0.9s 0.6s forwards; }
+.hero-stats { display: flex; gap: 2.5rem; opacity: 0; animation: fadeUp 0.8s 0.8s forwards; }
+.stat { text-align: center; }
+.stat .n { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--white); line-height: 1; }
+.stat .l { font-size: 11px; color: var(--fog); letter-spacing: 0.08em; margin-top: 4px; }
+.scroll-hint { position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s 1.2s forwards; }
+.scroll-hint span { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--fog); }
+.scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--teal-glow), transparent); animation: scrollPulse 2s infinite; }
 
-.glow-orb {
-  position: absolute;
-  width: 600px; height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(29,158,117,0.12) 0%, transparent 70%);
-  top: 50%; left: 50%;
-  transform: translate(-50%, -60%);
-  pointer-events: none;
-}
-
-.org-label {
-  font-family: 'Jost', sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--teal-glow);
+.header-logo {
   margin-bottom: 2rem;
   opacity: 0;
   animation: fadeUp 0.8s 0.2s forwards;
 }
-
-.hero-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 300;
-  font-size: clamp(2.8rem, 7vw, 5.5rem);
-  line-height: 1.08;
-  color: var(--white);
-  max-width: 800px;
-  margin-bottom: 1.8rem;
-  opacity: 0;
-  animation: fadeUp 0.9s 0.4s forwards;
+.header-logo img {
+  height: 72px;
+  width: auto;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
 }
 
-.hero-title em {
-  font-style: italic;
-  color: var(--amber);
-}
+@keyframes scrollPulse { 0%,100%{opacity:0.3} 50%{opacity:0.9} }
 
-.hero-sub {
-  font-size: 15px;
-  font-weight: 300;
-  color: var(--mist);
-  max-width: 500px;
-  line-height: 1.75;
-  margin-bottom: 3rem;
-  opacity: 0;
-  animation: fadeUp 0.9s 0.6s forwards;
-}
+/* FILTERS */
+.projects-section { padding: 4rem 2rem 7rem; max-width: 1160px; margin: 0 auto; }
+.section-top { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(200,214,232,0.08); }
+.section-eyebrow { font-size: 10px; font-weight: 500; letter-spacing: 0.25em; text-transform: uppercase; color: var(--teal-glow); margin-bottom: 0.5rem; }
+.section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.6rem,3vw,2.2rem); font-weight: 300; color: var(--white); }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-btn { font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; padding: 5px 13px; border-radius: 20px; border: 1px solid rgba(200,214,232,0.15); background: transparent; color: var(--fog); cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: rgba(200,214,232,0.35); color: var(--mist); }
+.filter-btn.active { background: rgba(29,158,117,0.12); border-color: rgba(29,158,117,0.4); color: var(--teal-glow); }
+.filter-btn.f-priority.active { background: rgba(212,162,76,0.12); border-color: rgba(212,162,76,0.4); color: var(--amber); }
 
-.scroll-hint {
-  position: absolute;
-  bottom: 2.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  opacity: 0;
-  animation: fadeUp 0.8s 1.2s forwards;
-}
+/* GRID */
+.projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
 
-.scroll-hint span {
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--fog);
-}
-
-.scroll-line {
-  width: 1px;
-  height: 40px;
-  background: linear-gradient(to bottom, var(--teal-glow), transparent);
-  animation: scrollPulse 2s infinite;
-}
-
-@keyframes scrollPulse {
-  0%, 100% { opacity: 0.3; transform: scaleY(1); }
-  50% { opacity: 0.9; transform: scaleY(1.1); }
-}
-
-/* ── PROJECTS SECTION ── */
-.projects-section {
-  padding: 5rem 2rem 7rem;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.section-eyebrow {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--teal-glow);
-  margin-bottom: 0.75rem;
-}
-
-.section-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
-  font-weight: 300;
-  color: var(--white);
-  margin-bottom: 3rem;
-  border-bottom: 1px solid rgba(200,214,232,0.1);
-  padding-bottom: 1.5rem;
-}
-
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-  gap: 1.25rem;
-}
-
-/* ── PROJECT CARD ── */
-.card {
-  position: relative;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(200,214,232,0.1);
-  border-radius: 16px;
-  padding: 1.75rem;
-  cursor: pointer;
-  transition: transform 0.25s, border-color 0.25s, background 0.25s;
-  overflow: hidden;
-  text-decoration: none;
-  color: inherit;
-  display: block;
-  animation: fadeUp 0.7s both;
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(29,158,117,0.07), transparent);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.card:hover { transform: translateY(-4px); border-color: rgba(29,158,117,0.35); background: rgba(255,255,255,0.055); }
+/* CARD */
+.card { position: relative; background: rgba(255,255,255,0.03); border: 1px solid rgba(200,214,232,0.09); border-radius: 14px; padding: 1.5rem; cursor: pointer; transition: transform 0.25s, border-color 0.25s, background 0.25s; overflow: hidden; text-decoration: none; color: inherit; display: block; }
+.card::before { content: ''; position: absolute; inset: 0; border-radius: 14px; background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(29,158,117,0.06), transparent); opacity: 0; transition: opacity 0.3s; }
+.card.priority-card { border-color: rgba(212,162,76,0.2); }
+.card.priority-card::before { background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,162,76,0.06), transparent); }
+.card:hover { transform: translateY(-3px); border-color: rgba(29,158,117,0.3); background: rgba(255,255,255,0.05); }
+.card.priority-card:hover { border-color: rgba(212,162,76,0.4); }
 .card:hover::before { opacity: 1; }
-
-.card-tag {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 20px;
-  display: inline-block;
-  margin-bottom: 1rem;
-}
-
-.tag-active   { background: rgba(29,158,117,0.15); color: var(--teal-glow); border: 1px solid rgba(29,158,117,0.3); }
-.tag-planning { background: rgba(212,162,76,0.12); color: var(--amber); border: 1px solid rgba(212,162,76,0.25); }
-.tag-draft    { background: rgba(200,214,232,0.08); color: var(--mist); border: 1px solid rgba(200,214,232,0.18); }
-
-.card-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.25rem;
-  font-weight: 400;
-  line-height: 1.35;
-  color: var(--white);
-  margin-bottom: 0.75rem;
-}
-
-.card-desc {
-  font-size: 13px;
-  font-weight: 300;
-  color: var(--mist);
-  line-height: 1.65;
-  margin-bottom: 1.5rem;
-}
-
-.card-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--fog);
-}
-
-.card-tasks { display: flex; align-items: center; gap: 5px; }
-.card-tasks svg { opacity: 0.5; }
-
-.card-arrow {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  border: 1px solid rgba(200,214,232,0.15);
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-}
-
-.card:hover .card-arrow {
-  border-color: var(--teal-glow);
-  background: rgba(29,158,117,0.15);
-}
-
+.card.hidden { display: none; }
+.card-top { display: flex; align-items: center; gap: 7px; margin-bottom: 0.9rem; flex-wrap: wrap; }
+.tag { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; display: inline-block; }
+.tag-active { background: rgba(29,158,117,0.15); color: var(--teal-glow); border: 1px solid rgba(29,158,117,0.3); }
+.tag-planning { background: rgba(212,162,76,0.1); color: var(--amber); border: 1px solid rgba(212,162,76,0.22); }
+.tag-done { background: rgba(200,214,232,0.07); color: var(--mist); border: 1px solid rgba(200,214,232,0.15); }
+.tag-priority { background: rgba(212,162,76,0.14); color: var(--amber); border: 1px solid rgba(212,162,76,0.38); font-size: 9px; }
+.card-num { font-size: 10px; color: var(--fog); margin-left: auto; }
+.card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 400; line-height: 1.3; color: var(--white); margin-bottom: 0.6rem; }
+.card-desc { font-size: 12px; font-weight: 300; color: var(--mist); line-height: 1.6; margin-bottom: 1.25rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.card-footer { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--fog); }
+.card-tasks-label { display: flex; align-items: center; gap: 5px; }
+.card-arrow { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(200,214,232,0.12); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.card:hover .card-arrow { border-color: var(--teal-glow); background: rgba(29,158,117,0.12); }
 .card:hover .card-arrow svg { stroke: var(--teal-glow); }
 
-/* Progress mini-bar */
-.mini-progress { margin-bottom: 1.25rem; }
-.mini-track { height: 3px; background: rgba(200,214,232,0.1); border-radius: 2px; }
-.mini-fill { height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--teal), var(--teal-glow)); }
-.mini-label { font-size: 11px; color: var(--fog); margin-top: 5px; }
-
-/* ── ADD PROJECT CARD ── */
-.card-add {
-  border: 1px dashed rgba(200,214,232,0.15);
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  min-height: 220px;
-  gap: 1rem;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-  border-radius: 16px;
-  text-decoration: none;
-  color: inherit;
-}
-
-.card-add:hover { border-color: rgba(29,158,117,0.4); background: rgba(29,158,117,0.04); }
-
-.add-icon {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  border: 1px solid rgba(200,214,232,0.2);
-  display: flex; align-items: center; justify-content: center;
-}
-
-.card-add p { font-size: 13px; color: var(--fog); font-weight: 300; }
-.card-add strong { font-size: 14px; color: var(--mist); font-weight: 400; display: block; }
-
-/* ── FOOTER ── */
-footer {
-  border-top: 1px solid rgba(200,214,232,0.08);
-  padding: 2.5rem 2rem;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(200,214,232,0.25);
-  letter-spacing: 0.05em;
-  position: relative;
-  z-index: 2;
-}
-
-/* ── ANIMATIONS ── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(22px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.card:nth-child(1) { animation-delay: 0.05s; }
-.card:nth-child(2) { animation-delay: 0.15s; }
-.card:nth-child(3) { animation-delay: 0.25s; }
-.card:nth-child(4) { animation-delay: 0.35s; }
-.card:nth-child(5) { animation-delay: 0.45s; }
-.card:nth-child(6) { animation-delay: 0.55s; }
-
-@media (max-width: 600px) {
-  .projects-grid { grid-template-columns: 1fr; }
-  header { min-height: 85vh; }
-}
+footer { border-top: 1px solid rgba(200,214,232,0.07); padding: 2rem; text-align: center; font-size: 11px; color: rgba(200,214,232,0.22); letter-spacing: 0.05em; position: relative; z-index: 2; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@media(max-width:600px){ .projects-grid{grid-template-columns:1fr} header{min-height:75vh} }
 </style>
 </head>
 <body>
-
 <canvas id="sky"></canvas>
-
 <div class="page">
 
-  <!-- HERO -->
-  <header>
-    <div class="glow-orb"></div>
-    <p class="org-label">Royal Astronomical Society of Canada</p>
-    <h1 class="hero-title">Light Pollution<br><em>Abatement</em> Projects</h1>
-    <p class="hero-sub">A central hub for RASC's ongoing initiatives to protect natural night environments, preserve starry skies, and advocate for human and ecological wellbeing.</p>
-    <div class="scroll-hint">
-      <span>View projects</span>
-      <div class="scroll-line"></div>
+<header>
+  <div class="glow-orb"></div>
+  <div class="header-logo"><img src="data:image/png;base64,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" alt="Royal Astronomical Society of Canada" /></div>
+  <h1 class="hero-title">Light Pollution<br><em>Abatement</em> Projects</h1>
+  <p class="hero-sub">A central hub for RASC's ongoing initiatives to protect natural night environments, preserve starry skies, and advocate for human and ecological wellbeing.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="n">22</div><div class="l">Projects</div></div>
+    <div class="stat"><div class="n">7</div><div class="l">Priority</div></div>
+    <div class="stat"><div class="n">2026</div><div class="l">Season</div></div>
+  </div>
+  <div class="scroll-hint"><span>View projects</span><div class="scroll-line"></div></div>
+</header>
+
+<section class="projects-section">
+  <div class="section-top">
+    <div>
+      <p class="section-eyebrow">Active &amp; Planned Initiatives</p>
+      <h2 class="section-title">All Projects</h2>
     </div>
-  </header>
-
-  <!-- PROJECTS -->
-  <section class="projects-section">
-    <p class="section-eyebrow">Active &amp; Planned Initiatives</p>
-    <h2 class="section-title">All Projects</h2>
-
-    <div class="projects-grid" id="project-grid">
-
-      <!-- Card 1 — the one we built -->
-      <a class="card" href="LPA_Project_Language_Standards.html">
-        <span class="card-tag tag-active">Active</span>
-        <h3 class="card-title">Standardized Language for LPA Use</h3>
-        <p class="card-desc">Comprehensive messaging guidelines emphasizing natural night environments, starry sky preservation, and human &amp; environmental health benefits.</p>
-        <div class="mini-progress">
-          <div class="mini-track"><div class="mini-fill" style="width:0%"></div></div>
-          <div class="mini-label">0 / 12 tasks complete</div>
-        </div>
-        <div class="card-meta">
-          <div class="card-tasks">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            12 tasks
-          </div>
-          <div class="card-arrow">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
-      </a>
-
-      <!-- Card 2 -->
-      <a class="card" href="#">
-        <span class="card-tag tag-planning">Planning</span>
-        <h3 class="card-title">Dark Sky Reserve Designation Campaign</h3>
-        <p class="card-desc">Coordinate applications and supporting documentation for new International Dark Sky Reserve designations across Canadian sites.</p>
-        <div class="mini-progress">
-          <div class="mini-track"><div class="mini-fill" style="width:0%"></div></div>
-          <div class="mini-label">Not yet started</div>
-        </div>
-        <div class="card-meta">
-          <div class="card-tasks">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Planned
-          </div>
-          <div class="card-arrow">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
-      </a>
-
-      <!-- Card 3 -->
-      <a class="card" href="#">
-        <span class="card-tag tag-planning">Planning</span>
-        <h3 class="card-title">Municipal Lighting Policy Advocacy</h3>
-        <p class="card-desc">Develop outreach kits and policy briefs for engaging municipal governments on responsible outdoor lighting ordinances and bylaws.</p>
-        <div class="mini-progress">
-          <div class="mini-track"><div class="mini-fill" style="width:0%"></div></div>
-          <div class="mini-label">Not yet started</div>
-        </div>
-        <div class="card-meta">
-          <div class="card-tasks">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Planned
-          </div>
-          <div class="card-arrow">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
-      </a>
-
-      <!-- Card 4 -->
-      <a class="card" href="#">
-        <span class="card-tag tag-draft">Draft</span>
-        <h3 class="card-title">LPA Public Awareness Campaign</h3>
-        <p class="card-desc">Bilingual (EN/FR) public education campaign on the impact of light pollution on nocturnal wildlife, human sleep, and night sky heritage.</p>
-        <div class="mini-progress">
-          <div class="mini-track"><div class="mini-fill" style="width:0%"></div></div>
-          <div class="mini-label">Not yet started</div>
-        </div>
-        <div class="card-meta">
-          <div class="card-tasks">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Draft
-          </div>
-          <div class="card-arrow">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
-      </a>
-
-      <!-- Card 5 -->
-      <a class="card" href="#">
-        <span class="card-tag tag-draft">Draft</span>
-        <h3 class="card-title">Local Centre LPA Toolkit</h3>
-        <p class="card-desc">Practical resources, templates, and implementation guides enabling RASC local centres to run their own LPA programs independently.</p>
-        <div class="mini-progress">
-          <div class="mini-track"><div class="mini-fill" style="width:0%"></div></div>
-          <div class="mini-label">Not yet started</div>
-        </div>
-        <div class="card-meta">
-          <div class="card-tasks">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Draft
-          </div>
-          <div class="card-arrow">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
-      </a>
-
-      <!-- Add project -->
-      <div class="card-add" onclick="alert('Link this card to a new project page!')">
-        <div class="add-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="rgba(200,214,232,0.4)" stroke-width="1.5"><path d="M8 3v10M3 8h10" stroke-linecap="round"/></svg>
-        </div>
-        <div>
-          <strong>Add a project</strong>
-          <p>Link to a new initiative page</p>
-        </div>
-      </div>
-
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all" onclick="filter('all',this)">All</button>
+      <button class="filter-btn f-priority" data-filter="priority" onclick="filter('priority',this)">★ Priority</button>
+      <button class="filter-btn" data-filter="active" onclick="filter('active',this)">Active</button>
+      <button class="filter-btn" data-filter="planning" onclick="filter('planning',this)">Planning</button>
+      <button class="filter-btn" data-filter="done" onclick="filter('done',this)">Complete</button>
     </div>
-  </section>
+  </div>
 
-  <footer>
-    Royal Astronomical Society of Canada &nbsp;·&nbsp; Light Pollution Abatement Program &nbsp;·&nbsp; 2026
-  </footer>
+  <div class="projects-grid" id="grid">
 
+    <a class="card priority-card" href="alan-stakeholder-list.html" data-status="active" data-priority="true">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="tag tag-priority">★ Priority</span><span class="card-num">#8</span></div>
+      <h3 class="card-title">ALAN Stakeholder Contact List</h3>
+      <p class="card-desc">Compile a comprehensive contact list of Artificial Light at Night stakeholders across law enforcement, business, city planning, conservation, and medical groups.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>9 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card priority-card" href="centre-rotation-touchpoints.html" data-status="planning" data-priority="true">
+      <div class="card-top"><span class="tag tag-planning">Planning</span><span class="tag tag-priority">★ Priority</span><span class="card-num">#14</span></div>
+      <h3 class="card-title">Rotating Centre Touch Points</h3>
+      <p class="card-desc">Implement a rotation system for centres hosting informal bi-monthly/quarterly touch point meetings with localized agendas.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>9 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card priority-card" href="outreach-packages.html" data-status="active" data-priority="true">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="tag tag-priority">★ Priority</span><span class="card-num">#16</span></div>
+      <h3 class="card-title">Ready-to-Go Outreach Packages</h3>
+      <p class="card-desc">Develop and distribute comprehensive outreach packages including slide decks, handouts, videos, and social media content. Pilot before July.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>10 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card priority-card" href="french-english-translation.html" data-status="active" data-priority="true">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="tag tag-priority">★ Priority</span><span class="card-num">#18</span></div>
+      <h3 class="card-title">French/English Content Translation</h3>
+      <p class="card-desc">Identify and translate high-impact LPA content into French and English with bilingual contributors, particularly Montreal members.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>10 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card priority-card" href="bylaw-template-toolkit.html" data-status="planning" data-priority="true">
+      <div class="card-top"><span class="tag tag-planning">Planning</span><span class="tag tag-priority">★ Priority</span><span class="card-num">#21</span></div>
+      <h3 class="card-title">Bylaw Template & Municipal Outreach Toolkit</h3>
+      <p class="card-desc">Share the bylaw template and municipal outreach toolkit with interested centres once matured, with pilot testing before broader rollout.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>10 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card priority-card" href="national-centre-excellence.html" data-status="planning" data-priority="true">
+      <div class="card-top"><span class="tag tag-planning">Planning</span><span class="tag tag-priority">★ Priority</span><span class="card-num">#22</span></div>
+      <h3 class="card-title">National Centre of Excellence for Light Pollution</h3>
+      <p class="card-desc">Establish a comprehensive national hub for light pollution research, education, and resource development across organizations.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>11 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="pm-nature-strategy.html" data-status="planning" data-priority="false">
+      <div class="card-top"><span class="tag tag-planning">Planning</span><span class="card-num">#4</span></div>
+      <h3 class="card-title">Investigate PM Carney's Nature Strategy</h3>
+      <p class="card-desc">Research and analyze the opportunity presented by PM Carney's new nature strategy to protect Canada and assess potential LPA partnership opportunities.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>7 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="home-audit-tool.html" data-status="active" data-priority="false">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="card-num">#5</span></div>
+      <h3 class="card-title">Home Lighting Audit Tool</h3>
+      <p class="card-desc">A comprehensive tool for homeowners to evaluate property lighting, identify improvements, and optimize for dark sky compliance.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>10 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="vancouver-brochures.html" data-status="active" data-priority="false">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="card-num">#6</span></div>
+      <h3 class="card-title">Vancouver Event Brochures — May 1</h3>
+      <p class="card-desc">Prepare print-ready digital brochure files for Leigh's Vancouver outreach event on May 1st.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>8 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="quebec-lighting-standard.html" data-status="done" data-priority="false">
+      <div class="card-top"><span class="tag tag-done">Complete</span><span class="card-num">#7</span></div>
+      <h3 class="card-title">Quebec Lighting Standard — Remy/MM</h3>
+      <p class="card-desc">Obtained and translated (draft) the Quebec lighting standard document from Remy at MM.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>6 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="security-lighting-education.html" data-status="planning" data-priority="false">
+      <div class="card-top"><span class="tag tag-planning">Planning</span><span class="card-num">#9</span></div>
+      <h3 class="card-title">Security Lighting Education</h3>
+      <p class="card-desc">Educational materials for law enforcement and insurance companies to break the myth cycle around security lighting. Related to Gerry S in Winnipeg.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>10 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="satellite-swarm-strategy.html" data-status="planning" data-priority="false">
+      <div class="card-top"><span class="tag tag-planning">Planning</span><span class="card-num">#10</span></div>
+      <h3 class="card-title">Satellite Swarm Communication Strategy</h3>
+      <p class="card-desc">Develop a strategy for discussing satellite swarm operations, availability windows, and impact on dark sky observing.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>8 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="dsp-diagnostic-pamphlet.html" data-status="active" data-priority="false">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="card-num">#11</span></div>
+      <h3 class="card-title">DSP Facilitator Diagnostic Pamphlet</h3>
+      <p class="card-desc">A short diagnostic pamphlet on dark sky categories for RASC DSP facilitators to reference when answering visitor questions.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>9 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="certificate-of-merit-delivery.html" data-status="active" data-priority="false">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="card-num">#12</span></div>
+      <h3 class="card-title">Certificate of Merit Materials Distribution</h3>
+      <p class="card-desc">Coordinate delivery of Certificate of Merit guide and form to centre presidents via national, cc LPA reps.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>8 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="certificate-of-merit-winners.html" data-status="active" data-priority="false">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="card-num">#13</span></div>
+      <h3 class="card-title">Certificate of Merit Winners Page</h3>
+      <p class="card-desc">Create a dedicated page to display Certificate of Merit winners including historical records of past recipients.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>7 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="iya2009-card-reprint.html" data-status="active" data-priority="false">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="card-num">#15</span></div>
+      <h3 class="card-title">Reprint IYA2009 RASC Victoria LPA Cards</h3>
+      <p class="card-desc">Reprint the IYA2009 RASC Victoria LPA outreach cards for public events and science fairs. Bernie is following up on digital files.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>9 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="pilot-centre-volunteers.html" data-status="active" data-priority="false">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="card-num">#17</span></div>
+      <h3 class="card-title">Call for Pilot Centre Volunteers</h3>
+      <p class="card-desc">Issue a call for centres to volunteer as pilots for new templates, toolkits, and the resource hub. Form working groups as needed.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>9 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="graphic-designer.html" data-status="planning" data-priority="false">
+      <div class="card-top"><span class="tag tag-planning">Planning</span><span class="card-num">#19</span></div>
+      <h3 class="card-title">Engage Graphic Designer</h3>
+      <p class="card-desc">Investigate and engage a graphic designer for national outreach materials to avoid copyright issues and refresh visual content.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>10 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="dark-sky-fixtures.html" data-status="active" data-priority="false">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="card-num">#20</span></div>
+      <h3 class="card-title">Dark Sky Compliant Fixtures Resource</h3>
+      <p class="card-desc">Collect and share dark sky compliant lighting fixture information on the national website, including examples from Mount Megantic.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>9 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="dss-annual-reports.html" data-status="active" data-priority="false">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="card-num">#23</span></div>
+      <h3 class="card-title">Re-engage DSS Operators for Annual Reports</h3>
+      <p class="card-desc">Reach out to DSS operators to restart the flow of annual reports, identify barriers, and establish a sustainable reporting process.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>10 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="lpa-language-standards.html" data-status="active" data-priority="false">
+      <div class="card-top"><span class="tag tag-active">Active</span><span class="card-num">#24</span></div>
+      <h3 class="card-title">Standardized Language for LPA Use</h3>
+      <p class="card-desc">Comprehensive messaging guidelines emphasizing natural night environments, starry sky preservation, and human and environmental health benefits.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>12 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a>
+
+    <a class="card" href="centre-lpa-starter-kit.html" data-status="planning" data-priority="false">
+      <div class="card-top"><span class="tag tag-planning">Planning</span><span class="card-num">#25</span></div>
+      <h3 class="card-title">Centre LPA Starter Kit</h3>
+      <p class="card-desc">A comprehensive starter kit with committee structure, mandates, work plan templates, and SMART goal frameworks for Centre LPA.</p>
+      <div class="card-footer"><div class="card-tasks-label"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>10 tasks</div><div class="card-arrow"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </a
+
+  </div>/div>
+</section>
+
+<footer>Royal Astronomical Society of Canada &nbsp;·&nbsp; Light Pollution Abatement Program &nbsp;·&nbsp; 2026</footer>
 </div>
 
 <script>
-/* ── STAR FIELD ── */
-const canvas = document.getElementById('sky');
-const ctx = canvas.getContext('2d');
-let stars = [];
-let W, H;
-
-function resize() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
-
-function initStars() {
-  stars = [];
-  const count = Math.floor((W * H) / 6000);
-  for (let i = 0; i < count; i++) {
-    stars.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 1.2 + 0.2,
-      a: Math.random(),
-      speed: Math.random() * 0.008 + 0.002,
-      phase: Math.random() * Math.PI * 2
-    });
-  }
-}
-
-function drawStars(t) {
-  ctx.clearRect(0, 0, W, H);
-  // Deep sky gradient
-  const bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, '#060d16');
-  bg.addColorStop(0.6, '#081018');
-  bg.addColorStop(1, '#0B1724');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
-
-  // Subtle Milky Way band
-  const mw = ctx.createLinearGradient(W * 0.2, 0, W * 0.8, H);
-  mw.addColorStop(0, 'transparent');
-  mw.addColorStop(0.4, 'rgba(29,158,117,0.025)');
-  mw.addColorStop(0.6, 'rgba(200,214,232,0.018)');
-  mw.addColorStop(1, 'transparent');
-  ctx.fillStyle = mw;
-  ctx.fillRect(0, 0, W, H);
-
-  // Stars
-  stars.forEach(s => {
-    const alpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(220,232,250,${alpha * s.a})`;
-    ctx.fill();
-    // Subtle glow on brighter stars
-    if (s.r > 0.9) {
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
-      const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 3);
-      g.addColorStop(0, `rgba(200,220,255,${alpha * 0.12})`);
-      g.addColorStop(1, 'transparent');
-      ctx.fillStyle = g;
-      ctx.fill();
-    }
+function filter(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.card').forEach(card => {
+    if (type === 'all') { card.classList.remove('hidden'); return; }
+    if (type === 'priority') { card.classList.toggle('hidden', card.dataset.priority !== 'true'); return; }
+    card.classList.toggle('hidden', card.dataset.status !== type);
   });
 }
 
-let raf;
-function animate(t) {
-  drawStars(t * 0.001);
-  raf = requestAnimationFrame(animate);
-}
-
-window.addEventListener('resize', () => { resize(); initStars(); });
-resize(); initStars(); animate(0);
+// Stars
+const canvas = document.getElementById('sky');
+const ctx = canvas.getContext('2d');
+let stars=[], W, H;
+function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+function initStars(){ stars=[]; const n=Math.floor(W*H/6500); for(let i=0;i<n;i++) stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+0.2,a:Math.random(),sp:Math.random()*0.007+0.002,ph:Math.random()*Math.PI*2}); }
+function draw(t){ ctx.clearRect(0,0,W,H); const bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#060d16'); bg.addColorStop(1,'#0B1724'); ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  const mw=ctx.createLinearGradient(W*0.2,0,W*0.8,H); mw.addColorStop(0,'transparent'); mw.addColorStop(0.5,'rgba(29,158,117,0.02)'); mw.addColorStop(1,'transparent'); ctx.fillStyle=mw; ctx.fillRect(0,0,W,H);
+  stars.forEach(s=>{ const al=0.25+0.75*(0.5+0.5*Math.sin(t*s.sp+s.ph)); ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(220,232,250,${al*s.a})`; ctx.fill(); }); }
+window.addEventListener('resize',()=>{resize();initStars();});
+resize(); initStars();
+(function loop(t){ draw(t*0.001); requestAnimationFrame(loop); })(0);
 </script>
-
 </body>
 </html>
