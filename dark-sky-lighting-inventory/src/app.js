@@ -272,11 +272,11 @@ const S = {
         <div style="margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
           ${f.photos && f.photos.length ? `<div>
             <div style="font-size:10px;font-weight:500;color:var(--color-text-secondary,#666);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Photos (${f.photos.length})</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap">${f.photos.map(p => `<img class="pth" src="${p.data}" style="cursor:pointer" onclick="S.lightbox('${p.data}')">`).join('')}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">${f.photos.map(p => `<img class="pth" src="${p.data}" style="cursor:pointer" onclick="S.lightboxById('${f.id}','photo',${f.photos.indexOf(p)})">`).join('')}</div>
           </div>` : ''}
           ${f.spectrum ? `<div>
             <div style="font-size:10px;font-weight:500;color:var(--color-text-secondary,#666);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Spectrum</div>
-            <img src="${f.spectrum.data}" style="max-height:80px;border-radius:5px;border:.5px solid rgba(0,0,0,.1);cursor:pointer" onclick="S.lightbox('${f.spectrum.data}')" alt="Spectrum">
+            <img src="${f.spectrum.data}" style="max-height:80px;border-radius:5px;border:.5px solid rgba(0,0,0,.1);cursor:pointer" onclick="S.lightboxById('${f.id}','spectrum')" alt="Spectrum">
           </div>` : ''}
         </div>` : ''}
       ${f.notes ? `<div style="margin-top:6px;font-size:11px;color:var(--color-text-secondary,#666);padding:.35rem .6rem;background:var(--cgl);border-radius:5px">${f.notes}</div>` : ''}
@@ -287,8 +287,18 @@ const S = {
     const ov = document.createElement('div');
     ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:1rem';
     ov.onclick = () => ov.remove();
-    ov.innerHTML = `<img src="${src}" style="max-width:95vw;max-height:92vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5)">`;
+    const img = document.createElement('img');
+    img.src = src;
+    img.style.cssText = 'max-width:95vw;max-height:92vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5)';
+    ov.appendChild(img);
     document.body.appendChild(ov);
+  },
+
+  lightboxById(fid, type, idx) {
+    const fx = S.currentFx().find(x => x.id === fid);
+    if (!fx) return;
+    const src = type === 'spectrum' ? fx.spectrum && fx.spectrum.data : fx.photos && fx.photos[idx] && fx.photos[idx].data;
+    if (src) S.lightbox(src);
   },
 
   cctStyle(cct) {
