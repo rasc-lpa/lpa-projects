@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Dark Sky Lighting Inventory — RASC-compatible tool for surveying and improving outdoor lighting at dark sky sites.">
+<meta name="theme-color" content="#0F6E56">
+<title>Dark Sky Lighting Inventory</title>
+
+<!-- PWA manifest -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.6;color:var(--color-text-primary,#1a1a1a);background:var(--color-background-tertiary,#f5f5f0);min-height:100vh}
+:root{--ct:#0F6E56;--ctl:#E1F5EE;--ctm:#1D9E75;--ca:#BA7517;--cal:#FAEEDA;--cr:#A32D2D;--crl:#FCEBEB;--cgl:#F1EFE8;--r:10px}
+.hdr{background:var(--ct);color:#fff;padding:.875rem 1.25rem;display:flex;align-items:center;gap:11px}
+.hdr h1{font-size:16px;font-weight:500}.hdr p{font-size:11px;opacity:.8}
+.hico{width:38px;height:38px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.tabs{display:flex;background:var(--color-background-primary,#fff);border-bottom:.5px solid rgba(0,0,0,.1);overflow-x:auto}
+.tab{padding:.65rem 1rem;font-size:12px;font-weight:500;color:var(--color-text-secondary,#666);border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:.15s;display:flex;align-items:center;gap:4px}
+.tab.active{color:var(--ct);border-bottom-color:var(--ct)}.tab:hover{color:var(--ct);background:var(--ctl)}
+.main{padding:1rem;max-width:960px;margin:0 auto}
+.card{background:var(--color-background-primary,#fff);border-radius:var(--r);border:.5px solid rgba(0,0,0,.1);padding:1.1rem;margin-bottom:.85rem}
+.ct{font-size:13px;font-weight:500;margin-bottom:.85rem;display:flex;align-items:center;gap:6px;color:var(--ct)}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px}
+.fgi{display:flex;flex-direction:column;gap:3px;position:relative}
+label{font-size:10px;font-weight:500;color:var(--color-text-secondary,#666);text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:4px}
+input,select,textarea{border:.5px solid rgba(0,0,0,.2);border-radius:6px;padding:5px 8px;font-size:12px;color:var(--color-text-primary,#1a1a1a);background:var(--color-background-primary,#fff);width:100%;outline:none;transition:.15s;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:var(--ct);box-shadow:0 0 0 2px rgba(15,110,86,.15)}
+textarea{min-height:65px;resize:vertical}
+.btn{padding:6px 12px;border-radius:6px;border:.5px solid rgba(0,0,0,.2);background:var(--color-background-primary,#fff);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:.15s;color:var(--color-text-primary,#1a1a1a);font-family:inherit}
+.btn:hover{background:var(--cgl)}.btn-p{background:var(--ct);color:#fff;border-color:var(--ct)}.btn-p:hover{background:var(--ctm)}
+.btn-d{background:var(--crl);color:var(--cr);border-color:rgba(163,45,45,.2)}.btn-d:hover{background:rgba(163,45,45,.15)}
+.btn-s{padding:4px 8px;font-size:11px}
+.bdg{display:inline-flex;align-items:center;padding:2px 6px;border-radius:20px;font-size:10px;font-weight:500}
+.bc{background:var(--ctl);color:var(--ct)}.bn{background:var(--crl);color:var(--cr)}.bt{background:var(--cal);color:var(--ca)}
+.fx{background:var(--color-background-primary,#fff);border-radius:var(--r);border:.5px solid rgba(0,0,0,.1);padding:.85rem;margin-bottom:.65rem;transition:.15s}
+.fx:hover{border-color:rgba(15,110,86,.3)}
+.fxh{display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem;flex-wrap:wrap;gap:5px}
+.fxid{font-weight:500;font-size:12px;color:var(--ct)}
+.pdrop{border:1.5px dashed rgba(0,0,0,.18);border-radius:7px;padding:1rem;text-align:center;cursor:pointer;color:var(--color-text-secondary,#666);font-size:11px;transition:.15s}
+.pdrop:hover{border-color:var(--ct);background:var(--ctl)}
+.sdrop{border:1.5px dashed rgba(0,0,0,.18);border-radius:7px;padding:.875rem;text-align:center;cursor:pointer;color:var(--color-text-secondary,#666);font-size:11px;transition:.15s}
+.sdrop:hover{border-color:var(--ca);background:var(--cal)}
+.pth{width:64px;height:64px;object-fit:cover;border-radius:5px;border:.5px solid rgba(0,0,0,.1)}
+.pr{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.pi{position:relative}
+.prm{position:absolute;top:-5px;right:-5px;width:16px;height:16px;background:var(--cr);color:#fff;border-radius:50%;border:none;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center}
+.geo{background:var(--cgl);border-radius:5px;padding:.5rem .7rem;font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.geocd{font-family:monospace;font-size:10px;color:var(--color-text-secondary,#666)}
+.sprev{max-width:100%;max-height:150px;border-radius:5px;border:.5px solid rgba(0,0,0,.1);margin-top:6px;display:block}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:7px;margin-bottom:.85rem}
+.sc{background:var(--color-background-secondary,#f8f7f2);border-radius:7px;padding:.7rem .875rem}
+.sl{font-size:10px;color:var(--color-text-secondary,#666);margin-bottom:2px}.sv{font-size:19px;font-weight:500}
+.sl-list{list-style:none}.sli{display:flex;justify-content:space-between;align-items:center;padding:.65rem .875rem;border-bottom:.5px solid rgba(0,0,0,.07);cursor:pointer;transition:.15s}
+.sli:hover{background:var(--ctl)}.sli:last-child{border-bottom:none}
+.sln{font-weight:500;font-size:13px}.slm{font-size:11px;color:var(--color-text-secondary,#666)}
+.empty{text-align:center;padding:2rem 1rem;color:var(--color-text-secondary,#666)}
+.empty i{font-size:32px;opacity:.3;display:block;margin-bottom:.5rem}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;flex-wrap:wrap;gap:6px}
+.stit{font-size:14px;font-weight:500}
+.pb{height:5px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;margin-top:4px}
+.pf{height:100%;background:var(--ct);border-radius:3px;transition:.3s}
+.al{padding:.65rem .875rem;border-radius:7px;font-size:11px;margin-bottom:.6rem;display:flex;align-items:flex-start;gap:6px}
+.ai{background:#E6F1FB;color:#185FA5}.as{background:var(--ctl);color:var(--ct)}.aw{background:var(--cal);color:var(--ca)}
+details summary{cursor:pointer;font-size:12px;color:var(--ct);font-weight:500;padding:.35rem 0;list-style:none;display:flex;align-items:center;gap:4px}
+details summary::marker{display:none}details[open] summary .chev{transform:rotate(90deg)}.chev{transition:.15s;display:inline-block}
+.tip{font-size:10px;color:var(--color-text-secondary,#666);margin-top:1px}
+.bnr{background:linear-gradient(135deg,#0a1628,#0F6E56 80%);color:#fff;border-radius:var(--r);padding:1.1rem;margin-bottom:.85rem;display:flex;align-items:center;gap:11px}
+.bnr h2{font-size:13px;font-weight:500;margin-bottom:2px}.bnr p{font-size:11px;opacity:.75}
+.hidden{display:none}
+.map-container{width:100%;height:280px;border-radius:7px;border:.5px solid rgba(0,0,0,.1);overflow:hidden;background:#eef3ee;position:relative;margin-top:.65rem}
+.yoy-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.yoy-card{border:.5px solid rgba(0,0,0,.1);border-radius:7px;padding:.75rem;background:var(--color-background-primary,#fff)}
+.yoy-year{font-size:10px;font-weight:500;color:var(--color-text-secondary,#666);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem}
+.diff-up{color:var(--ct);font-size:10px;font-weight:500}.diff-dn{color:var(--cr);font-size:10px;font-weight:500}.diff-eq{color:var(--color-text-secondary,#666);font-size:10px}
+.inst-step{display:flex;gap:9px;padding:.65rem;background:var(--cgl);border-radius:7px;margin-bottom:.4rem;font-size:12px;align-items:flex-start}
+.inst-num{width:22px;height:22px;background:var(--ct);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;margin-top:1px}
+.os-tabs{display:flex;gap:5px;margin-bottom:.85rem}
+.os-tab{padding:4px 12px;border-radius:20px;border:.5px solid rgba(0,0,0,.2);font-size:11px;cursor:pointer;transition:.15s;font-family:inherit;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a)}
+.os-tab.active{background:var(--ct);color:#fff;border-color:var(--ct)}
+table{border-collapse:collapse;width:100%}
+th{text-align:left;padding:4px 6px;font-size:11px;font-weight:500;color:var(--color-text-secondary,#666);border-bottom:.5px solid rgba(0,0,0,.12)}
+td{padding:4px 6px;font-size:11px;border-bottom:.5px solid rgba(0,0,0,.06)}
+.tt-wrap{position:relative;display:inline-flex;align-items:center}
+.tt-icon{width:14px;height:14px;border-radius:50%;background:rgba(15,110,86,.15);color:var(--ct);font-size:9px;display:inline-flex;align-items:center;justify-content:center;cursor:help;flex-shrink:0;font-weight:700}
+.tt-box{position:absolute;left:0;top:calc(100% + 6px);z-index:500;background:var(--color-background-primary,#fff);border:.5px solid rgba(0,0,0,.15);border-radius:9px;padding:.75rem;min-width:260px;max-width:340px;box-shadow:0 4px 16px rgba(0,0,0,.12);pointer-events:none;opacity:0;transform:translateY(-4px);transition:.18s;font-size:11px;color:var(--color-text-primary,#1a1a1a)}
+.tt-wrap:hover .tt-box,.tt-wrap:focus-within .tt-box{opacity:1;transform:translateY(0);pointer-events:auto}
+.tt-box h4{font-size:12px;font-weight:500;margin-bottom:.4rem;color:var(--ct)}
+.tt-box p{line-height:1.5;color:var(--color-text-secondary,#666)}
+.tt-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:.5rem}
+.tt-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:.35rem;background:var(--cgl);border-radius:6px}
+.tt-item span{font-size:9px;text-align:center;color:var(--color-text-secondary,#666)}
+.import-zone{border:2px dashed rgba(15,110,86,.35);border-radius:9px;padding:1.5rem;text-align:center;cursor:pointer;transition:.15s;color:var(--color-text-secondary,#666)}
+.import-zone:hover{border-color:var(--ct);background:var(--ctl)}
+.import-preview{background:var(--cgl);border-radius:7px;padding:.75rem;margin-top:.75rem;font-size:11px;max-height:200px;overflow-y:auto}
+.imp-row{padding:3px 0;border-bottom:.5px solid rgba(0,0,0,.06);display:flex;gap:8px}
+.imp-ok{color:var(--ct)}.imp-warn{color:var(--ca)}
+
+/* PWA install banner */
+#install-banner{display:none;position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:var(--ct);color:#fff;padding:.65rem 1.1rem;border-radius:20px;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:999;gap:10px;align-items:center}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hico"><i class="ti ti-moon-stars"></i></div>
+  <div><h1>Dark Sky Lighting Inventory</h1><p>RASC-compatible · EXIF geo · spectrum · year-over-year tracking</p></div>
+</div>
+
+<nav class="tabs" id="nav">
+  <button class="tab active" data-tab="sites"><i class="ti ti-building"></i> Sites</button>
+  <button class="tab" data-tab="inventory"><i class="ti ti-list-details"></i> Inventory</button>
+  <button class="tab" data-tab="photos"><i class="ti ti-camera"></i> Photos & Spectra</button>
+  <button class="tab" data-tab="report"><i class="ti ti-chart-bar"></i> Report & Map</button>
+  <button class="tab" data-tab="import"><i class="ti ti-file-import"></i> Import</button>
+  <button class="tab" data-tab="guide"><i class="ti ti-info-circle"></i> Guide</button>
+</nav>
+
+<div class="main">
+
+  <!-- SITES -->
+  <div id="tab-sites">
+    <div class="bnr"><i class="ti ti-stars" style="font-size:28px;flex-shrink:0"></i><div><h2>Dark Sky Lighting Inventory</h2><p>RASC 5-principle framework: Need · Target · Quantity · Colour · Control</p></div></div>
+    <div class="sh"><div class="stit">Your sites</div><button class="btn btn-p btn-s" onclick="S.showNewSite()"><i class="ti ti-plus"></i> New site</button></div>
+    <div class="card hidden" id="new-site-form">
+      <div class="ct"><i class="ti ti-map-pin"></i> New site</div>
+      <div class="fg">
+        <div class="fgi" style="grid-column:span 2"><label>Site name</label><input id="ns-name" placeholder="e.g. Torrance Barrens Dark Sky Reserve"></div>
+        <div class="fgi"><label>Lighting zone</label><select id="ns-zone"><option value="">Select…</option><option value="LZ0">LZ0 – Dark</option><option value="LZ1">LZ1 – Low</option><option value="LZ2">LZ2 – Moderate</option><option value="LZ3">LZ3 – Suburban</option></select></div>
+        <div class="fgi"><label>Survey date</label><input type="date" id="ns-date"></div>
+        <div class="fgi" style="grid-column:span 2"><label>Address / location</label><input id="ns-addr"></div>
+        <div class="fgi"><label>Surveyor name</label><input id="ns-surv"></div>
+        <div class="fgi"><label>Contact email</label><input type="email" id="ns-email"></div>
+      </div>
+      <div style="margin-top:.75rem;display:flex;gap:6px">
+        <button class="btn btn-p btn-s" onclick="S.createSite()"><i class="ti ti-check"></i> Create</button>
+        <button class="btn btn-s" onclick="document.getElementById('new-site-form').classList.add('hidden')">Cancel</button>
+      </div>
+    </div>
+    <div class="card"><ul class="sl-list" id="sites-list"></ul><div class="empty hidden" id="sites-empty"><i class="ti ti-building"></i><p>No sites yet.</p></div></div>
+  </div>
+
+  <!-- INVENTORY -->
+  <div id="tab-inventory" class="hidden">
+    <div class="sh">
+      <div><div class="stit" id="inv-title">Select a site</div><div style="font-size:11px;color:var(--color-text-secondary,#666)" id="inv-meta"></div></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <select id="site-sel" onchange="S.selectSite(this.value)" style="font-size:12px;padding:4px 8px;border-radius:6px;border:.5px solid rgba(0,0,0,.2)"><option value="">Choose site…</option></select>
+        <button class="btn btn-p btn-s" onclick="S.addFixture()"><i class="ti ti-plus"></i> Add fixture</button>
+      </div>
+    </div>
+    <div id="fx-container"><div class="empty" id="fx-empty"><i class="ti ti-bulb"></i><p>Select a site and add your first luminaire.</p></div></div>
+  </div>
+
+  <!-- PHOTOS -->
+  <div id="tab-photos" class="hidden">
+    <div class="sh"><div class="stit">Photos & spectra</div><select id="photo-sel" onchange="S.loadPhotoTab(this.value)" style="font-size:12px;padding:4px 8px;border-radius:6px;border:.5px solid rgba(0,0,0,.2)"><option value="">Choose site…</option></select></div>
+    <div class="al ai"><i class="ti ti-info-circle" style="flex-shrink:0;margin-top:1px"></i><span>GPS coordinates extracted from photo EXIF automatically. See <strong>Guide</strong> for iOS/Android setup.</span></div>
+    <div id="photo-content"><div class="empty"><i class="ti ti-camera"></i><p>Select a site.</p></div></div>
+  </div>
+
+  <!-- REPORT -->
+  <div id="tab-report" class="hidden">
+    <div class="sh"><div class="stit">Report & map</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <select id="report-sel" onchange="S.loadReport(this.value)" style="font-size:12px;padding:4px 8px;border-radius:6px;border:.5px solid rgba(0,0,0,.2)"><option value="">Choose site…</option></select>
+        <button class="btn btn-s" onclick="S.exportCSV()"><i class="ti ti-download"></i> CSV</button>
+      </div>
+    </div>
+    <div id="report-content"><div class="empty"><i class="ti ti-chart-bar"></i><p>Select a site.</p></div></div>
+  </div>
+
+  <!-- IMPORT -->
+  <div id="tab-import" class="hidden">
+    <div class="card">
+      <div class="ct"><i class="ti ti-file-import"></i> Import inventory data</div>
+      <div class="al ai" style="margin-bottom:.875rem"><i class="ti ti-info-circle" style="flex-shrink:0;margin-top:1px"></i>
+        <span>Import a CSV exported from this tool, or use manual entry for older RASC spreadsheets. Columns are mapped automatically and issues flagged before you commit.</span>
+      </div>
+      <div style="display:flex;gap:7px;margin-bottom:.875rem;flex-wrap:wrap">
+        <button class="btn btn-p btn-s" id="imp-csv-btn" onclick="S.showImportMode('csv')"><i class="ti ti-file-spreadsheet"></i> Import CSV</button>
+        <button class="btn btn-s" id="imp-manual-btn" onclick="S.showImportMode('manual')"><i class="ti ti-keyboard"></i> Manual entry</button>
+      </div>
+      <div id="imp-csv" class="hidden">
+        <label class="import-zone" onclick="document.getElementById('csv-file-in').click()">
+          <i class="ti ti-upload" style="font-size:24px;display:block;margin-bottom:.5rem"></i>
+          <strong>Click to upload a CSV file</strong>
+          <span style="display:block;font-size:11px;margin-top:3px">Exported from this tool, or RASC-format spreadsheet saved as CSV</span>
+        </label>
+        <input type="file" accept=".csv,text/csv" id="csv-file-in" style="display:none" onchange="S.parseCSV(event)">
+        <div id="csv-preview" class="hidden"></div>
+      </div>
+      <div id="imp-manual" class="hidden">
+        <p style="font-size:12px;color:var(--color-text-secondary,#666);margin-bottom:.75rem">Enter details about a previous survey year to create a historical record for year-over-year comparison.</p>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fgi"><label>Site</label><select id="imp-site"><option value="">Select site…</option></select></div>
+          <div class="fgi"><label>Survey year</label><input type="number" id="imp-year" placeholder="e.g. 2022" min="2000" max="2035"></div>
+          <div class="fgi"><label>Surveyor</label><input id="imp-surv" placeholder="Name"></div>
+          <div class="fgi"><label>Date surveyed</label><input type="date" id="imp-date"></div>
+        </div>
+        <div id="imp-manual-fixtures">
+          <div class="sh" style="margin-bottom:.5rem"><div style="font-size:12px;font-weight:500">Fixtures</div><button class="btn btn-s" onclick="S.addManualFx()"><i class="ti ti-plus"></i> Add row</button></div>
+          <div id="imp-fx-rows"></div>
+        </div>
+        <button class="btn btn-p" style="margin-top:.75rem" onclick="S.saveManualImport()"><i class="ti ti-check"></i> Save historical survey</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GUIDE -->
+  <div id="tab-guide" class="hidden">
+    <div class="card">
+      <div class="ct"><i class="ti ti-device-mobile"></i> Enabling GPS in photos</div>
+      <div class="os-tabs"><button class="os-tab active" id="ios-btn" onclick="S.showOS('ios')"><i class="ti ti-brand-apple"></i> iOS</button><button class="os-tab" id="and-btn" onclick="S.showOS('android')"><i class="ti ti-brand-android"></i> Android</button></div>
+      <div id="ios-inst">
+        <div class="inst-step"><div class="inst-num">1</div><div>Open <strong>Settings</strong> on your iPhone or iPad.</div></div>
+        <div class="inst-step"><div class="inst-num">2</div><div>Tap <strong>Privacy & Security → Location Services</strong>. Ensure it is <strong>On</strong>.</div></div>
+        <div class="inst-step"><div class="inst-num">3</div><div>Find <strong>Camera</strong> in the app list → set to <strong>While Using the App</strong>.</div></div>
+        <div class="inst-step"><div class="inst-num">4</div><div>Take photos with the Camera app — GPS embeds automatically.</div></div>
+        <div style="margin-top:.65rem;padding:.65rem;background:var(--cal);border-radius:7px;font-size:11px;color:var(--ca)"><i class="ti ti-alert-triangle"></i> When sharing photos, choose <strong>Original</strong> quality to preserve EXIF data.</div>
+      </div>
+      <div id="and-inst" class="hidden">
+        <div class="inst-step"><div class="inst-num">1</div><div>Open the <strong>Camera</strong> app and tap the <strong>Settings gear</strong>.</div></div>
+        <div class="inst-step"><div class="inst-num">2</div><div>Enable <strong>Location tags / GPS location / Save location</strong>.</div></div>
+        <div class="inst-step"><div class="inst-num">3</div><div>Grant Camera <strong>Location permission</strong> when prompted.</div></div>
+        <div class="inst-step"><div class="inst-num">4</div><div>On Google Photos, use <strong>Upload original quality</strong> to preserve EXIF.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct"><i class="ti ti-moon-stars"></i> RASC 5-principle framework</div>
+      <div style="display:grid;gap:.5rem" id="principles-list"></div>
+    </div>
+    <div class="card">
+      <div class="ct"><i class="ti ti-wave-sine"></i> Spectrum tools</div>
+      <p style="font-size:12px;color:var(--color-text-secondary,#666);margin-bottom:.65rem">Screenshot from any of these apps and upload to the fixture's spectrum slot:</p>
+      <div style="display:grid;gap:.4rem;font-size:12px">
+        <div style="padding:.5rem .75rem;background:var(--cgl);border-radius:6px"><strong>Spectroid</strong> (Android, free) — real-time spectrogram</div>
+        <div style="padding:.5rem .75rem;background:var(--cgl);border-radius:6px"><strong>Spectrometer+</strong> (iOS) — camera-based light spectrum</div>
+        <div style="padding:.5rem .75rem;background:var(--cgl);border-radius:6px"><strong>USB spectrometer software</strong> (Ocean Optics, Hamamatsu) — export as PNG/JPG</div>
+        <div style="padding:.5rem .75rem;background:var(--cgl);border-radius:6px"><strong>Any SPD or CCT/CRI data screenshot</strong> from a calibrated meter</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct"><i class="ti ti-database"></i> Data & storage</div>
+      <p style="font-size:12px;color:var(--color-text-secondary,#666);line-height:1.8">Data is stored in your browser's local storage. Use <strong>Export CSV</strong> regularly to back up your work. Photos and spectra are stored as base64 — roughly 0.5–2 MB per image.<br><br>
+      For multi-user or hosted use, see the <a href="https://github.com/rasc-lpa/dark-sky-lighting-inventory" style="color:var(--ct)">GitHub repository</a> for deployment options including Google Sheets integration and PWA packaging.</p>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div id="install-banner">
+  <i class="ti ti-download"></i> <span>Add to home screen for offline use</span>
+  <button class="btn btn-s" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)" onclick="S.installPWA()">Install</button>
+  <button class="btn btn-s" style="background:none;color:rgba(255,255,255,.7);border:none" onclick="document.getElementById('install-banner').style.display='none'">✕</button>
+</div>
+
+<script src="src/app.js"></script>
+</body>
+</html>
