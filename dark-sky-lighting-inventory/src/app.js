@@ -268,37 +268,36 @@ const S = {
         <div><span style="color:var(--color-text-secondary,#666)">Shielding:</span> ${f.shielding || '—'}</div>
       </div>
       ${f.geoLat ? `<div class="geo" style="margin-top:6px"><i class="ti ti-map-pin" style="color:var(--ct)"></i><span class="geocd">${f.geoLat.toFixed(6)}, ${f.geoLon.toFixed(6)}</span><span style="font-size:9px;color:var(--color-text-secondary,#666)">${f.geoSrc === 'exif' ? '📷 EXIF' : '📍 GPS'}</span></div>` : ''}
-      ${(f.photos && f.photos.length) || f.spectrum ? `
-        <div style="margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
-          ${f.photos && f.photos.length ? `<div>
-            <div style="font-size:10px;font-weight:500;color:var(--color-text-secondary,#666);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Photos (${f.photos.length})</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap">${f.photos.map(p => `<img class="pth" src="${p.data}" style="cursor:pointer" onclick="S.lightboxById('${f.id}','photo',${f.photos.indexOf(p)})">`).join('')}</div>
-          </div>` : ''}
-          ${f.spectrum ? `<div>
-            <div style="font-size:10px;font-weight:500;color:var(--color-text-secondary,#666);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Spectrum</div>
-            <img src="${f.spectrum.data}" style="max-height:80px;border-radius:5px;border:.5px solid rgba(0,0,0,.1);cursor:pointer" onclick="S.lightboxById('${f.id}','spectrum')" alt="Spectrum">
-          </div>` : ''}
+      ${(f.photos && f.photos.length) || f.spectrum ? `<div style="margin-top:9px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+        ${f.photos && f.photos.length ? `<div>
+          <div style="font-size:10px;font-weight:500;color:var(--color-text-secondary,#666);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Photos (${f.photos.length})</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">${f.photos.map((p,pi) => `<img class="pth" src="${p.data}" style="cursor:zoom-in" title="Click to enlarge" onclick="S.lightboxId('${f.id}','photo',${pi})">`).join('')}</div>
         </div>` : ''}
+        ${f.spectrum ? `<div>
+          <div style="font-size:10px;font-weight:500;color:var(--color-text-secondary,#666);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Spectrum</div>
+          <img src="${f.spectrum.data}" style="max-height:75px;border-radius:5px;border:.5px solid rgba(0,0,0,.1);cursor:zoom-in" title="Click to enlarge" onclick="S.lightboxId('${f.id}','spectrum')">
+        </div>` : ''}
+      </div>` : ''}
       ${f.notes ? `<div style="margin-top:6px;font-size:11px;color:var(--color-text-secondary,#666);padding:.35rem .6rem;background:var(--cgl);border-radius:5px">${f.notes}</div>` : ''}
     </div>`;
   },
 
-  lightbox(src) {
+  lightboxId(fid, type, idx) {
+    const fx = S.currentFx().find(x => x.id === fid);
+    if (!fx) return;
+    const src = type === 'spectrum'
+      ? (fx.spectrum && fx.spectrum.data)
+      : (fx.photos && fx.photos[idx] && fx.photos[idx].data);
+    if (!src) return;
     const ov = document.createElement('div');
-    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:1rem';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2000;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:1rem';
+    ov.title = 'Click to close';
     ov.onclick = () => ov.remove();
     const img = document.createElement('img');
     img.src = src;
-    img.style.cssText = 'max-width:95vw;max-height:92vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5)';
+    img.style.cssText = 'max-width:94vw;max-height:90vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.6)';
     ov.appendChild(img);
     document.body.appendChild(ov);
-  },
-
-  lightboxById(fid, type, idx) {
-    const fx = S.currentFx().find(x => x.id === fid);
-    if (!fx) return;
-    const src = type === 'spectrum' ? fx.spectrum && fx.spectrum.data : fx.photos && fx.photos[idx] && fx.photos[idx].data;
-    if (src) S.lightbox(src);
   },
 
   cctStyle(cct) {
@@ -455,7 +454,7 @@ const S = {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem">
         <div>
           <div style="font-size:11px;font-weight:500;margin-bottom:5px;color:var(--color-text-secondary,#666)">Daytime photos</div>
-          <div class="pr">${(f.photos || []).map((p, pi) => `<div class="pi"><img class="pth" src="${p.data}"><button class="prm" onclick="S.remPhoto('${f.id}',${pi})">×</button></div>`).join('')}</div>
+          <div class="pr">${(f.photos || []).map((p, pi) => `<div class="pi"><img class="pth" src="${p.data}" style="cursor:zoom-in" title="Click to enlarge" onclick="S.lightboxId('${f.id}','photo',${pi})"><button class="prm" onclick="S.remPhoto('${f.id}',${pi})">×</button></div>`).join('')}</div>
           <label class="pdrop" style="display:block;margin-top:6px" onclick="document.getElementById('pin-${f.id}').click()">
             <i class="ti ti-camera-plus" style="font-size:16px;display:block;margin-bottom:2px"></i>Add photo
             <span style="font-size:9px;display:block;margin-top:1px">GPS extracted from EXIF automatically</span>
@@ -465,7 +464,7 @@ const S = {
         <div>
           <div style="font-size:11px;font-weight:500;margin-bottom:5px;color:var(--color-text-secondary,#666)">Spectrum screenshot</div>
           ${f.spectrum
-            ? `<img src="${f.spectrum.data}" class="sprev" alt="Spectrum"><button class="btn btn-s btn-d" style="margin-top:5px" onclick="S.remSpec('${f.id}')"><i class="ti ti-trash"></i> Remove</button>`
+            ? `<img src="${f.spectrum.data}" class="sprev" style="cursor:zoom-in" title="Click to enlarge" onclick="S.lightboxId('${f.id}','spectrum')" alt="Spectrum"><button class="btn btn-s btn-d" style="margin-top:5px" onclick="S.remSpec('${f.id}')"><i class="ti ti-trash"></i> Remove</button>`
             : `<label class="sdrop" style="display:block" onclick="document.getElementById('sin-${f.id}').click()"><i class="ti ti-wave-sine" style="font-size:16px;display:block;margin-bottom:2px"></i>Upload spectrum<span style="font-size:9px;display:block;margin-top:1px">PNG/JPG from spectrometer app</span></label><input type="file" accept="image/*" style="display:none" id="sin-${f.id}" onchange="S.addSpec(event,'${f.id}')">`}
         </div>
       </div>
@@ -642,8 +641,12 @@ const S = {
   exportCSV() {
     const site = D.sites[D.cur]; if (!site) { alert('Select a site.'); return; }
     const yr   = S.currentYr(), fx = site.surveys[yr] ? site.surveys[yr].fixtures : [];
-    const h    = ['Survey Year','Fixture ID','Zone','Location','Purpose','Activity','Num Luminaires','Lamps/Luminaire','Luminaire Type','Shielding','Mount Height (m)','Lamp Type','CCT (K)','Watts','Lumens','When Needed','Control','Operable','Compliant','Geo Lat','Geo Lon','Geo Accuracy (m)','Geo Source','Photos','Spectrum','Notes'];
-    const rows = fx.map(f => [yr, f.fixId, f.zone, f.location, f.purpose, f.activity, f.numLuminaires, f.lampsPerLum, f.lumType, f.shielding, f.mountHeight, f.lampType, f.cct, f.watts, f.lumens, f.whenNeeded, f.control, f.operable, f.compliant, f.geoLat ? f.geoLat.toFixed(6) : '', f.geoLon ? f.geoLon.toFixed(6) : '', f.geoAccuracy ? Math.round(f.geoAccuracy) : '', f.geoSrc || '', (f.photos || []).length, f.spectrum ? 'Yes' : 'No', f.notes].map(v => '"' + (v || '').toString().replace(/"/g, '""') + '"'));
+    const h    = ['Survey Year','Fixture ID','Zone','Location','Purpose','Activity','Num Luminaires','Lamps/Luminaire','Luminaire Type','Shielding','Mount Height (m)','Lamp Type','CCT (K)','Watts','Lumens','When Needed','Control','Operable','Compliant','Geo Lat','Geo Lon','Geo Accuracy (m)','Geo Source','Photo Count','Photo 1 (base64)','Photo 2 (base64)','Photo 3 (base64)','Spectrum (base64)','Notes'];
+    const rows = fx.map(f => {
+      const photos = f.photos || [];
+      const row = [yr, f.fixId, f.zone, f.location, f.purpose, f.activity, f.numLuminaires, f.lampsPerLum, f.lumType, f.shielding, f.mountHeight, f.lampType, f.cct, f.watts, f.lumens, f.whenNeeded, f.control, f.operable, f.compliant, f.geoLat ? f.geoLat.toFixed(6) : '', f.geoLon ? f.geoLon.toFixed(6) : '', f.geoAccuracy ? Math.round(f.geoAccuracy) : '', f.geoSrc || '', photos.length, photos[0] ? photos[0].data : '', photos[1] ? photos[1].data : '', photos[2] ? photos[2].data : '', f.spectrum ? f.spectrum.data : '', f.notes];
+      return row.map(v => '"' + (v || '').toString().replace(/"/g, '""') + '"');
+    });
     const csv  = [h.join(','), ...rows.map(r => r.join(','))].join('\n');
     const b    = new Blob([csv], { type: 'text/csv' });
     const u    = URL.createObjectURL(b);
